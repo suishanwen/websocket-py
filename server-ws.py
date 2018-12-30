@@ -53,7 +53,7 @@ def recv_data(clientSocket):
 
 
 def send_data(clientSocket):
-    cmd = "tail -f /home/netUseMonitor/nohup.out"
+    cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     while True:
         token = b'\x81'
