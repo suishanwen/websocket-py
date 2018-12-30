@@ -7,7 +7,7 @@ import time, datetime, struct
 import json
 import subprocess
 
-HOST = "localhost"
+HOST = "0.0.0.0"
 PORT = 9090
 MAGIC_STRING = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
 HANDSHAKE_STRING = "HTTP/1.1 101 Switching Protocols\r\n" \
