@@ -59,7 +59,7 @@ def send_data(clientSocket):
         token = b'\x81'
         line = popen.stdout.readline().strip()  # 获取内容
         if line:
-            data = str(line)
+            data = bytes.decode(line, encoding="utf-8")
             length = len(data.encode())
             if length <= 125:
                 token += struct.pack('B', length)
