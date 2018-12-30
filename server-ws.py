@@ -73,9 +73,9 @@ def send_data(clientSocket):
 
 def handshake(serverSocket):
     while True:
-        # print("getting connection")
+        print("getting connection")
         clientSocket, addressInfo = serverSocket.accept()
-        # print("get connected")
+        print("get connected")
         request = clientSocket.recv(2048)
         # print(request.decode())
         # 获取Sec-WebSocket-Key
