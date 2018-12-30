@@ -22,7 +22,8 @@ def on_close(ws):
 
 
 def on_open(ws):
-    threading.Thread(target=send_data, args=(ws,)).start()
+    print("### open ###")
+    # threading.Thread(target=send_data, args=(ws,)).start()
 
 
 def send_data(ws):
@@ -33,10 +34,10 @@ def send_data(ws):
 
 if __name__ == "__main__":
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://127.0.0.1:9090/",
+    ws = websocket.WebSocketApp("ws://bitcoinrobot.cn:9090/",
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close,
-                                header={'ID': '1'})
+                               )
     ws.on_open = on_open
     ws.run_forever()

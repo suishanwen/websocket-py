@@ -53,7 +53,7 @@ def recv_data(clientSocket):
 
 
 def send_data(clientSocket):
-    cmd = "tail -f /home/netUseMonitor/nohup.out"
+    cmd = "tail -f /Users/shanwensui/PycharmProjects/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     while True:
         token = b'\x81'
@@ -82,11 +82,6 @@ def handshake(serverSocket):
         ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()))
         if ret:
             key = ret.group(1)
-        else:
-            return
-        ret = re.search(r"ID: (\d)", str(request.decode()))
-        if ret:
-            id = ret.group(1)
         else:
             return
         Sec_WebSocket_Key = key + MAGIC_STRING
