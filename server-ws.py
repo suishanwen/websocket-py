@@ -79,6 +79,7 @@ def send_data(clientSocket):
             try:
                 send(clientSocket, data)
             except Exception:
+                popen.kill()
                 print("send exit!")
                 _exit = True
 
