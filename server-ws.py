@@ -48,28 +48,32 @@ def recv_data(clientSocket):
                 chunk = decoded[i] ^ mask[i % 4]
                 bytes_list.append(chunk)
             raw_str = str(bytes_list, encoding="utf-8")
-            data = json.loads(raw_str)
-            clientSocket.send(data.encode())
+            # data = json.loads(raw_str)
+            send(clientSocket, raw_str)
             time.sleep(1)
+
+
+def send(clientSocket, data):
+    token = b'\x81'
+    length = len(data.encode())
+    if length <= 125:
+        token += struct.pack('B', length)
+    elif length <= 0xFFFF:
+        token += struct.pack('!BH', 126, length)
+    else:
+        token += struct.pack('!BQ', 127, length)
+    data = token + data.encode()
+    clientSocket.send(data)
 
 
 def send_data(clientSocket):
     cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     while True:
-        token = b'\x81'
         line = popen.stdout.readline().strip()  # 获取内容
         if line:
             data = bytes.decode(line, encoding="utf-8")
-            length = len(data.encode())
-            if length <= 125:
-                token += struct.pack('B', length)
-            elif length <= 0xFFFF:
-                token += struct.pack('!BH', 126, length)
-            else:
-                token += struct.pack('!BQ', 127, length)
-            data = token + data.encode()
-            clientSocket.send(data)
+            send(clientSocket, data)
 
 
 def handshake(serverSocket):
