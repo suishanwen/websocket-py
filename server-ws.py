@@ -107,8 +107,8 @@ def handshake(serverSocket):
     response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
     clientSocket.send(response.encode())
     print("send the hand shake data")
-    t1 = threading.Thread(target=recv_data, args=(clientSocket,))
-    t1.start()
+    # t1 = threading.Thread(target=recv_data, args=(clientSocket,))
+    # t1.start()
     t2 = threading.Thread(target=send_data, args=(clientSocket,))
     t2.start()
 
