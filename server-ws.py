@@ -25,6 +25,7 @@ def recv_data(clientSocket):
             if not info:
                 return
         except:
+            print("recv exit!")
             return
         else:
             # print(info)
@@ -77,6 +78,7 @@ def send_data(clientSocket):
             try:
                 send(clientSocket, data)
             except Exception:
+                print("send exit!")
                 _exit = True
 
 
