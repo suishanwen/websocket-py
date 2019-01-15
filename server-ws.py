@@ -94,6 +94,7 @@ def handshake(serverSocket):
         if ret:
             key = ret.group(1)
         else:
+            print("return")
             return
         Sec_WebSocket_Key = key + MAGIC_STRING
         # print("key ", Sec_WebSocket_Key)
@@ -105,7 +106,7 @@ def handshake(serverSocket):
         # # 构建websocket返回数据
         response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
         clientSocket.send(response.encode())
-        # print("send the hand shake data")
+        print("send the hand shake data")
         t1 = threading.Thread(target=recv_data, args=(clientSocket,))
         t1.start()
         t2 = threading.Thread(target=send_data, args=(clientSocket,))
