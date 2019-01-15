@@ -49,6 +49,7 @@ def recv_data(clientSocket):
                 bytes_list.append(chunk)
             raw_str = str(bytes_list, encoding="utf-8")
             data = json.loads(raw_str)
+            clientSocket.send(data)
             time.sleep(1)
 
 
