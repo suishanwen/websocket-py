@@ -90,7 +90,7 @@ def handshake(serverSocket):
     request = clientSocket.recv(2048)
     print("request:"+request.decode())
     # 获取Sec-WebSocket-Key
-    ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()))
+    ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()),re.IGNORECASE)
     if ret:
         key = ret.group(1)
     else:
