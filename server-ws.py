@@ -20,6 +20,7 @@ HANDSHAKE_STRING = "HTTP/1.1 101 Switching Protocols\r\n" \
 
 def recv_data(clientSocket):
     while True:
+        print("recving...")
         try:
             info = clientSocket.recv(2048)
             if not info:
