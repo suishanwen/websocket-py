@@ -83,34 +83,33 @@ def send_data(clientSocket):
 
 
 def handshake(serverSocket):
-    while True:
-        print("getting connection")
-        clientSocket, addressInfo = serverSocket.accept()
-        print("get connected")
-        request = clientSocket.recv(2048)
-        # print(request.decode())
-        # 获取Sec-WebSocket-Key
-        ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()))
-        if ret:
-            key = ret.group(1)
-        else:
-            print("return")
-            return
-        Sec_WebSocket_Key = key + MAGIC_STRING
-        # print("key ", Sec_WebSocket_Key)
-        # # 将Sec-WebSocket-Key先进行sha1加密,转成二进制后在使用base64加密
-        response_key = base64.b64encode(hashlib.sha1(bytes(Sec_WebSocket_Key, encoding="utf8")).digest())
-        response_key_str = str(response_key)
-        response_key_str = response_key_str[2:30]
-        # print(response_key_str)
-        # # 构建websocket返回数据
-        response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
-        clientSocket.send(response.encode())
-        print("send the hand shake data")
-        t1 = threading.Thread(target=recv_data, args=(clientSocket,))
-        t1.start()
-        t2 = threading.Thread(target=send_data, args=(clientSocket,))
-        t2.start()
+    print("getting connection")
+    clientSocket, addressInfo = serverSocket.accept()
+    print("get connected")
+    request = clientSocket.recv(2048)
+    # print(request.decode())
+    # 获取Sec-WebSocket-Key
+    ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()))
+    if ret:
+        key = ret.group(1)
+    else:
+        print("Sec-WebSocket-Key not found , return !")
+        return
+    Sec_WebSocket_Key = key + MAGIC_STRING
+    # print("key ", Sec_WebSocket_Key)
+    # # 将Sec-WebSocket-Key先进行sha1加密,转成二进制后在使用base64加密
+    response_key = base64.b64encode(hashlib.sha1(bytes(Sec_WebSocket_Key, encoding="utf8")).digest())
+    response_key_str = str(response_key)
+    response_key_str = response_key_str[2:30]
+    # print(response_key_str)
+    # # 构建websocket返回数据
+    response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
+    clientSocket.send(response.encode())
+    print("send the hand shake data")
+    t1 = threading.Thread(target=recv_data, args=(clientSocket,))
+    t1.start()
+    t2 = threading.Thread(target=send_data, args=(clientSocket,))
+    t2.start()
 
 
 def main():
@@ -122,7 +121,8 @@ def main():
     serverSocket.listen(128)
     print("服务器运行, 等待用户链接")
     # 调用监听
-    handshake(serverSocket)
+    while True:
+        handshake(serverSocket)
 
 
 if __name__ == "__main__":
