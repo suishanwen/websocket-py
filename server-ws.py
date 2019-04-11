@@ -107,7 +107,8 @@ def handshake(serverSocket):
     ret = re.search(r"ID: (\d)", str(request.decode()))
     socket_id = 1
     if ret:
-        socket_id = ret.group(1)
+        socket_id = int(ret.group(1))
+    Logger.info("通道%d,已连接...", socket_id)
     Sec_WebSocket_Key = key + MAGIC_STRING
     # Logger.info("key ", Sec_WebSocket_Key)
     # # 将Sec-WebSocket-Key先进行sha1加密,转成二进制后在使用base64加密
@@ -118,7 +119,6 @@ def handshake(serverSocket):
     # # 构建websocket返回数据
     response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
     clientSocket.send(response.encode())
-    Logger.info("通道%d,发送数据...", socket_id)
     # t1 = threading.Thread(target=recv_data, args=(clientSocket,))
     # t1.start()
     t2 = threading.Thread(target=send_data, args=(clientSocket, socket_id))
