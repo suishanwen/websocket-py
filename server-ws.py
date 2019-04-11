@@ -3,9 +3,9 @@ import base64
 import hashlib
 import re
 import threading
-import time, datetime, struct
-import json
+import time, struct
 import subprocess
+from logger import Logger
 
 HOST = "0.0.0.0"
 PORT = 9090
@@ -16,20 +16,21 @@ HANDSHAKE_STRING = "HTTP/1.1 101 Switching Protocols\r\n" \
                    "Sec-WebSocket-Accept: {1}\r\n" \
                    "WebSocket-Location: ws://{2}/chat\r\n" \
                    "WebSocket-Protocol:chat\r\n\r\n"
+online_count = 0
 
 
 def recv_data(clientSocket):
     while True:
-        print("recving...")
+        Logger.info("recving...")
         try:
             info = clientSocket.recv(2048)
             if not info:
                 return
         except:
-            print("recv exit!")
+            Logger.info("recv exit!")
             return
         else:
-            # print(info)
+            # Logger.info(info)
             code_len = info[1] & 0x7f
             if code_len == 0x7e:
                 extend_payload_len = info[2:4]
@@ -44,8 +45,8 @@ def recv_data(clientSocket):
                 mask = info[2:6]
                 decoded = info[6:]
             bytes_list = bytearray()
-            # print(mask)
-            # print(decoded)
+            # Logger.info(mask)
+            # Logger.info(decoded)
             for i in range(len(decoded)):
                 chunk = decoded[i] ^ mask[i % 4]
                 bytes_list.append(chunk)
@@ -69,6 +70,8 @@ def send(clientSocket, data):
 
 
 def send_data(clientSocket, socket_id):
+    global online_count
+    online_count += 1
     if socket_id == 0:
         cmd = "tail -f /home/balance/ok/nohup.out"
     else:
@@ -83,21 +86,22 @@ def send_data(clientSocket, socket_id):
                 send(clientSocket, data)
             except Exception:
                 popen.kill()
-                print("send exit!")
+                online_count -= 1
+                Logger.info("用户退出，当前链接共%d人!", online_count)
                 _exit = True
 
 
 def handshake(serverSocket):
     clientSocket, addressInfo = serverSocket.accept()
-    print("connected")
+    Logger.info("connected")
     request = clientSocket.recv(2048)
-    print("request:" + request.decode())
+    Logger.info("request:" + request.decode())
     # 获取Sec-WebSocket-Key
     ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()), re.IGNORECASE)
     if ret:
         key = ret.group(1)
     else:
-        print("Sec-WebSocket-Key not found , return !")
+        Logger.error("Sec-WebSocket-Key not found , return !")
         return
     # socket id
     ret = re.search(r"ID: (\d)", str(request.decode()))
@@ -105,16 +109,16 @@ def handshake(serverSocket):
     if ret:
         socket_id = ret.group(1)
     Sec_WebSocket_Key = key + MAGIC_STRING
-    # print("key ", Sec_WebSocket_Key)
+    # Logger.info("key ", Sec_WebSocket_Key)
     # # 将Sec-WebSocket-Key先进行sha1加密,转成二进制后在使用base64加密
     response_key = base64.b64encode(hashlib.sha1(bytes(Sec_WebSocket_Key, encoding="utf8")).digest())
     response_key_str = str(response_key)
     response_key_str = response_key_str[2:30]
-    # print(response_key_str)
+    # Logger.info(response_key_str)
     # # 构建websocket返回数据
     response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
     clientSocket.send(response.encode())
-    print("send the hand shake data")
+    Logger.info("send the hand shake data")
     # t1 = threading.Thread(target=recv_data, args=(clientSocket,))
     # t1.start()
     t2 = threading.Thread(target=send_data, args=(clientSocket, socket_id))
@@ -128,7 +132,7 @@ def main():
     host = (HOST, PORT)
     serverSocket.bind(host)
     serverSocket.listen(128)
-    print("服务器运行, 等待用户链接")
+    Logger.info("服务器运行, 等待用户链接")
     # 调用监听
     while True:
         handshake(serverSocket)
