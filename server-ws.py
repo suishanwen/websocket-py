@@ -93,9 +93,9 @@ def send_data(clientSocket, socket_id):
 
 def handshake(serverSocket):
     clientSocket, addressInfo = serverSocket.accept()
-    Logger.info("connected")
+    Logger.info("用户接入！")
     request = clientSocket.recv(2048)
-    Logger.info("request:" + request.decode())
+    # Logger.info("request:" + request.decode())
     # 获取Sec-WebSocket-Key
     ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()), re.IGNORECASE)
     if ret:
@@ -118,7 +118,7 @@ def handshake(serverSocket):
     # # 构建websocket返回数据
     response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
     clientSocket.send(response.encode())
-    Logger.info("send the hand shake data")
+    Logger.info("通道%d,发送数据...", socket_id)
     # t1 = threading.Thread(target=recv_data, args=(clientSocket,))
     # t1.start()
     t2 = threading.Thread(target=send_data, args=(clientSocket, socket_id))
