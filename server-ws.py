@@ -68,8 +68,11 @@ def send(clientSocket, data):
     clientSocket.send(data)
 
 
-def send_data(clientSocket):
-    cmd = "tail -f /home/netUseMonitor/monitor.log"
+def send_data(clientSocket, socket_id):
+    if socket_id == 0:
+        cmd = "tail -f /home/balance/ok/nohup.out"
+    else:
+        cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     _exit = False
     while not _exit:
@@ -88,14 +91,19 @@ def handshake(serverSocket):
     clientSocket, addressInfo = serverSocket.accept()
     print("connected")
     request = clientSocket.recv(2048)
-    print("request:"+request.decode())
+    print("request:" + request.decode())
     # 获取Sec-WebSocket-Key
-    ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()),re.IGNORECASE)
+    ret = re.search(r"Sec-WebSocket-Key: (.*==)", str(request.decode()), re.IGNORECASE)
     if ret:
         key = ret.group(1)
     else:
         print("Sec-WebSocket-Key not found , return !")
         return
+    # socket id
+    ret = re.search(r"ID: (\d)", str(request.decode()))
+    socket_id = 1
+    if ret:
+        socket_id = ret.group(1)
     Sec_WebSocket_Key = key + MAGIC_STRING
     # print("key ", Sec_WebSocket_Key)
     # # 将Sec-WebSocket-Key先进行sha1加密,转成二进制后在使用base64加密
@@ -109,7 +117,7 @@ def handshake(serverSocket):
     print("send the hand shake data")
     # t1 = threading.Thread(target=recv_data, args=(clientSocket,))
     # t1.start()
-    t2 = threading.Thread(target=send_data, args=(clientSocket,))
+    t2 = threading.Thread(target=send_data, args=(clientSocket, socket_id))
     t2.start()
 
 
