@@ -76,7 +76,7 @@ def send_data(clientSocket, socket_id):
         cmd = "tail -f /home/balance/ok/nohup.out"
     else:
         cmd = "tail -f /home/netUseMonitor/monitor.log"
-    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
     _exit = False
     while not _exit:
         line = popen.stdout.readline().strip()  # 获取内容
