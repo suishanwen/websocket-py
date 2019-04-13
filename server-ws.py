@@ -77,7 +77,8 @@ def send_data(clientSocket, socket_id):
     else:
         cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    while popen.poll() == None:
+    alive = True
+    while popen.poll() == None and alive:
         line = popen.stdout.readline().strip()  # 获取内容
         if line:
             data = bytes.decode(line, encoding="utf-8")
@@ -86,6 +87,7 @@ def send_data(clientSocket, socket_id):
             except Exception:
                 popen.terminate()
                 online_count -= 1
+                alive = False
                 Logger.info("用户退出，当前链接共%d人!", online_count)
 
 
