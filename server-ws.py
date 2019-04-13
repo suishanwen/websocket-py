@@ -76,19 +76,17 @@ def send_data(clientSocket, socket_id):
         cmd = "tail -f /home/balance/ok/nohup.out"
     else:
         cmd = "tail -f /home/netUseMonitor/monitor.log"
-    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
-    _exit = False
-    while not _exit:
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    while popen.poll() == None:
         line = popen.stdout.readline().strip()  # 获取内容
         if line:
             data = bytes.decode(line, encoding="utf-8")
             try:
                 send(clientSocket, data)
             except Exception:
-                popen.kill()
+                popen.terminate()
                 online_count -= 1
                 Logger.info("用户退出，当前链接共%d人!", online_count)
-                _exit = True
 
 
 def handshake(serverSocket):
