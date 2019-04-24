@@ -24,6 +24,7 @@ def recv_data(clientSocket):
     try:
         info = clientSocket.recv(2048)
         if not info:
+            Logger.info("recv exit!")
             return
     except:
         Logger.info("recv exit!")
