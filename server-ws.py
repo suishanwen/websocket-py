@@ -20,40 +20,40 @@ online_count = 0
 
 
 def recv_data(clientSocket):
-    while True:
-        Logger.info("recving...")
-        try:
-            info = clientSocket.recv(2048)
-            if not info:
-                return
-        except:
-            Logger.info("recv exit!")
+    Logger.info("recving...")
+    try:
+        info = clientSocket.recv(2048)
+        if not info:
             return
+    except:
+        Logger.info("recv exit!")
+        return
+    else:
+        # Logger.info(info)
+        code_len = info[1] & 0x7f
+        if code_len == 0x7e:
+            extend_payload_len = info[2:4]
+            mask = info[4:8]
+            decoded = info[8:]
+        elif code_len == 0x7f:
+            extend_payload_len = info[2:10]
+            mask = info[10:14]
+            decoded = info[14:]
         else:
-            # Logger.info(info)
-            code_len = info[1] & 0x7f
-            if code_len == 0x7e:
-                extend_payload_len = info[2:4]
-                mask = info[4:8]
-                decoded = info[8:]
-            elif code_len == 0x7f:
-                extend_payload_len = info[2:10]
-                mask = info[10:14]
-                decoded = info[14:]
-            else:
-                extend_payload_len = None
-                mask = info[2:6]
-                decoded = info[6:]
-            bytes_list = bytearray()
-            # Logger.info(mask)
-            # Logger.info(decoded)
-            for i in range(len(decoded)):
-                chunk = decoded[i] ^ mask[i % 4]
-                bytes_list.append(chunk)
-            raw_str = str(bytes_list, encoding="utf-8")
-            # data = json.loads(raw_str)
-            send(clientSocket, raw_str)
-            time.sleep(1)
+            extend_payload_len = None
+            mask = info[2:6]
+            decoded = info[6:]
+        bytes_list = bytearray()
+        # Logger.info(mask)
+        # Logger.info(decoded)
+        for i in range(len(decoded)):
+            chunk = decoded[i] ^ mask[i % 4]
+            bytes_list.append(chunk)
+        raw_str = str(bytes_list, encoding="utf-8")
+        # data = json.loads(raw_str)
+        if raw_str == "ping":
+            send(clientSocket, "pong")
+    recv_data(clientSocket)
 
 
 def send(clientSocket, data):
@@ -78,7 +78,7 @@ def send_data(clientSocket, socket_id):
         cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     alive = True
-    while popen.poll() == None and alive:
+    while popen.poll() is None and alive:
         line = popen.stdout.readline().strip()  # 获取内容
         if line:
             data = bytes.decode(line, encoding="utf-8")
@@ -86,9 +86,11 @@ def send_data(clientSocket, socket_id):
                 send(clientSocket, data)
             except Exception:
                 popen.terminate()
+                clientSocket.close()
                 online_count -= 1
                 alive = False
                 Logger.info("用户退出，当前链接共%d人!", online_count)
+                Logger.info("当前活跃线程数：%d!", threading.activeCount())
 
 
 def handshake(serverSocket):
@@ -119,8 +121,8 @@ def handshake(serverSocket):
     # # 构建websocket返回数据
     response = HANDSHAKE_STRING.replace("{1}", response_key_str).replace("{2}", HOST + ":" + str(PORT))
     clientSocket.send(response.encode())
-    # t1 = threading.Thread(target=recv_data, args=(clientSocket,))
-    # t1.start()
+    t1 = threading.Thread(target=recv_data, args=(clientSocket,))
+    t1.start()
     t2 = threading.Thread(target=send_data, args=(clientSocket, socket_id))
     t2.start()
 
