@@ -75,6 +75,8 @@ def send_data(clientSocket, socket_id):
     online_count += 1
     if socket_id == 0:
         cmd = "tail -f /home/balance/ok/nohup.out"
+    elif socket_id == 1:
+        cmd = "tail -f /home/note-api.out"
     else:
         cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
