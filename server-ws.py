@@ -78,9 +78,9 @@ def send_data(clientSocket, socket_id):
     elif socket_id == 1:
         cmd = "tail -f /home/note-api.out"
     elif socket_id == 2:
-        cmd = "tail -f /home/netUseMonitor/monitor.log"
-    else:
         cmd = "tail -f /home/websocket-py/nohup.out"
+    else:
+        cmd = "tail -f /home/netUseMonitor/monitor.log"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     alive = True
     while popen.poll() is None and alive:
