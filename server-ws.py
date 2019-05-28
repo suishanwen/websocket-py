@@ -73,14 +73,14 @@ def send(clientSocket, data):
 def send_data(clientSocket, socket_id):
     global online_count
     online_count += 1
-    if socket_id == 0:
-        cmd = "tail -f /home/balance/ok/nohup.out"
-    elif socket_id == 1:
-        cmd = "tail -f /home/note-api.out"
-    elif socket_id == 2:
-        cmd = "tail -f /home/websocket-py/nohup.out"
-    else:
+    if socket_id == 1:
         cmd = "tail -f /home/netUseMonitor/monitor.log"
+    elif socket_id == 2:
+        cmd = "tail -f /home/balance/ok/nohup.out"
+    elif socket_id == 3:
+        cmd = "tail -f /home/note-api.out"
+    else:
+        cmd = "tail -f /home/websocket-py/nohup.out"
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     alive = True
     while popen.poll() is None and alive:
@@ -112,7 +112,7 @@ def handshake(serverSocket):
         return
     # socket id
     ret = re.search(r"ID: (\d)", str(request.decode()))
-    socket_id = 1
+    socket_id = 0
     if ret:
         socket_id = int(ret.group(1))
     Logger.info("通道%d,已连接...", socket_id)
